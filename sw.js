@@ -1,14 +1,14 @@
 const CACHE_NAME = 'mesh-viewer-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/js/app.js',
-  '/js/scene.js',
-  '/js/controls.js',
-  '/js/ui.js',
-  '/js/settings.js',
-  '/js/parsers.js',
+  '/ChroMesh/',
+  '/ChroMesh/index.html',
+  '/ChroMesh/styles.css',
+  '/ChroMesh/js/app.js',
+  '/ChroMesh/js/scene.js',
+  '/ChroMesh/js/controls.js',
+  '/ChroMesh/js/ui.js',
+  '/ChroMesh/js/settings.js',
+  '/ChroMesh/js/parsers.js',
   'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'
 ];
 
