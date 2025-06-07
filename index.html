@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Triangle Mesh Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="container">
+        <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <div class="drop-icon">📁</div>
+            <div class="drop-text">
+                Drop your mesh file here
+                <div class="drop-hint">Supports OBJ, STL, PLY files</div>
+            </div>
+        </div>
+        
+        <input type="file" id="file-input" accept=".obj,.stl,.ply" />
+        
+        <div id="info-panel">
+            <div id="mesh-info"></div>
+        </div>
+        
+        <div id="toggle-panel">
+            <div class="toggle-group">
+                <div class="toggle-with-icons">
+                    <svg class="toggle-icon" id="flat-icon" viewBox="0 0 24 24">
+                        <polygon points="12,2 20.5,7 20.5,17 12,22 3.5,17 3.5,7" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    </svg>
+                    <div class="toggle-switch active" id="shading-toggle">
+                        <div class="toggle-slider"></div>
+                    </div>
+                    <svg class="toggle-icon active" id="smooth-icon" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    </svg>
+                </div>
+                <input type="color" class="color-picker" id="surface-color" value="#4CAF50">
+            </div>
+            <div class="toggle-group">
+                <div class="toggle-with-icons">
+                    <svg class="toggle-icon active" id="solid-icon" viewBox="0 0 24 24">
+                        <polygon points="12,2 20.5,7 20.5,17 12,22 3.5,17 3.5,7" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    </svg>
+                    <div class="toggle-switch" id="wireframe-toggle">
+                        <div class="toggle-slider"></div>
+                    </div>
+                    <svg class="toggle-icon" id="wireframe-icon" viewBox="0 0 24 24">
+                        <polygon points="12,2 20.5,7 20.5,17 12,22 3.5,17 3.5,7" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                        <line x1="12" y1="2" x2="12" y2="22" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+                        <line x1="3.5" y1="7" x2="20.5" y2="17" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+                        <line x1="3.5" y1="17" x2="20.5" y2="7" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+                    </svg>
+                </div>
+                <input type="color" class="color-picker" id="wireframe-color" value="#ffffff">
+            </div>
+        </div>
+
+        <div id="axis-panel">
+            <div class="panel-title">Invert Axes</div>
+            <div class="axis-toggle-group">
+                <div class="axis-label">X</div>
+                <div class="axis-toggle-switch" id="invert-x-toggle">
+                    <div class="axis-toggle-slider"></div>
+                </div>
+            </div>
+            <div class="axis-toggle-group">
+                <div class="axis-label">Y</div>
+                <div class="axis-toggle-switch" id="invert-y-toggle">
+                    <div class="axis-toggle-slider"></div>
+                </div>
+            </div>
+            <div class="axis-toggle-group">
+                <div class="axis-label">Z</div>
+                <div class="axis-toggle-switch" id="invert-z-toggle">
+                    <div class="axis-toggle-slider"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="rotation-panel">
+            <div class="rotation-toggle-group">
+                <svg class="rotation-icon" id="rotation-icon" viewBox="0 0 24 24">
+                    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <path d="M17 8l4 0 0-4" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                </svg>
+                <div class="rotation-toggle-switch" id="auto-rotate-toggle">
+                    <div class="rotation-toggle-slider"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="controls">
+            <div>Left click + drag: Rotate</div>
+            <div>Right click + drag: Pan</div>
+            <div>Scroll: Zoom</div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/parsers.js"></script>
+    <script src="js/scene.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
