@@ -22,7 +22,7 @@ class PWAManager {
     async registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             try {
-                const registration = await navigator.serviceWorker.register('/sw.js');
+                const registration = await navigator.serviceWorker.register('/ChroMesh/sw.js');
                 console.log('Service Worker registered successfully:', registration);
                 
                 // Handle updates
@@ -84,25 +84,28 @@ class PWAManager {
         // Handle files opened from ChromeOS file manager
         if ('launchQueue' in window) {
             window.launchQueue.setConsumer(async (launchParams) => {
+                console.log('Launch queue triggered with params:', launchParams);
+                
                 if (launchParams.files && launchParams.files.length > 0) {
                     const fileHandle = launchParams.files[0];
                     try {
                         const file = await fileHandle.getFile();
-                        console.log('Opening file from ChromeOS:', file.name);
+                        console.log('Opening file from ChromeOS:', file.name, file.type, file.size);
                         
-                        // Wait for UI to be ready
-                        if (window.uiControls) {
-                            window.uiControls.handleFile(file);
-                        } else {
-                            // Store file to handle after initialization
-                            window.pendingFile = file;
-                        }
+                        // Wait for UI to be ready, then handle the file
+                        this.handleLaunchedFile(file);
+                        
                     } catch (error) {
-                        console.error('Error handling file:', error);
+                        console.error('Error handling file from launch queue:', error);
                     }
+                } else {
+                    console.log('No files in launch params');
                 }
             });
         }
+
+        // Also handle URL parameters (fallback method)
+        this.handleURLParams();
 
         // Handle drag and drop from file system
         document.addEventListener('dragover', (e) => {
@@ -116,6 +119,49 @@ class PWAManager {
                 window.uiControls.handleFile(files[0]);
             }
         });
+    }
+
+    async handleLaunchedFile(file) {
+        // Wait for UI to be ready
+        const maxWait = 5000; // 5 seconds
+        const checkInterval = 100; // 100ms
+        let waited = 0;
+
+        const waitForUI = () => {
+            return new Promise((resolve) => {
+                const check = () => {
+                    if (window.uiControls && window.meshManager) {
+                        console.log('UI ready, loading file:', file.name);
+                        resolve(true);
+                    } else if (waited < maxWait) {
+                        waited += checkInterval;
+                        setTimeout(check, checkInterval);
+                    } else {
+                        console.warn('UI not ready after timeout, storing file as pending');
+                        window.pendingFile = file;
+                        resolve(false);
+                    }
+                };
+                check();
+            });
+        };
+
+        const uiReady = await waitForUI();
+        if (uiReady) {
+            window.uiControls.handleFile(file);
+        }
+    }
+
+    handleURLParams() {
+        // Check for file information in URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const fileName = urlParams.get('file');
+        const fileType = urlParams.get('type');
+        
+        if (fileName) {
+            console.log('File info from URL:', fileName, fileType);
+            // Could show a message or prepare UI for expected file type
+        }
     }
 
     setupMessageListener() {
