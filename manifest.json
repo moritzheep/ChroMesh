@@ -1,0 +1,74 @@
+{
+    "name": "ChroMesh",
+    "short_name": "ChroMesh",
+    "description": "A 3D mesh viewer for OBJ, STL, and PLY files",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1e3c72",
+    "theme_color": "#2a5298",
+    "orientation": "any",
+    "scope": "/",
+    "icons": [
+      {
+        "src": "icons/icon-72x72.png",
+        "sizes": "72x72",
+        "type": "image/png"
+      },
+      {
+        "src": "icons/icon-96x96.png",
+        "sizes": "96x96",
+        "type": "image/png"
+      },
+      {
+        "src": "icons/icon-128x128.png",
+        "sizes": "128x128",
+        "type": "image/png"
+      },
+      {
+        "src": "icons/icon-144x144.png",
+        "sizes": "144x144",
+        "type": "image/png"
+      },
+      {
+        "src": "icons/icon-152x152.png",
+        "sizes": "152x152",
+        "type": "image/png"
+      },
+      {
+        "src": "icons/icon-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "icons/icon-384x384.png",
+        "sizes": "384x384",
+        "type": "image/png"
+      },
+      {
+        "src": "icons/icon-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ],
+    "file_handlers": [
+      {
+        "action": "/",
+        "accept": {
+          "model/obj": [".obj"],
+          "model/stl": [".stl"],
+          "model/ply": [".ply"]
+        },
+        "launch_type": "single-client"
+      }
+    ],
+    "categories": ["graphics", "utilities"],
+    "shortcuts": [
+      {
+        "name": "Open OBJ File",
+        "short_name": "Open OBJ",
+        "description": "Open an OBJ mesh file",
+        "url": "/?type=obj",
+        "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
+      }
+    ]
+  }
