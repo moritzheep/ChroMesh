@@ -152,16 +152,40 @@ class FileHandler {
         this.loadingCallbacks.push(callback);
     }
 
-    // Show/hide loading indicator
+    // Show/hide loading indicator with enhanced animation
     showLoading(show) {
         let loading = document.querySelector('.loading');
+        
         if (show && !loading) {
+            console.log('Creating loading animation...');
             loading = document.createElement('div');
             loading.className = 'loading';
-            loading.innerHTML = '<div class="spinner"></div>Loading mesh...';
+            loading.innerHTML = `
+                <div class="spinner"></div>
+                <span class="loading-text">Loading mesh...</span>
+            `;
             document.getElementById('container').appendChild(loading);
+            
+            // Force a reflow to ensure the element is in the DOM before animation starts
+            loading.offsetHeight;
+            
+            // Add a slight delay to ensure the animation is visible
+            setTimeout(() => {
+                loading.style.opacity = '1';
+            }, 10);
+            
         } else if (!show && loading) {
-            loading.remove();
+            console.log('Removing loading animation...');
+            
+            // Fade out animation before removal
+            loading.style.opacity = '0';
+            loading.style.transform = 'translate(-50%, -50%) scale(0.95)';
+            
+            setTimeout(() => {
+                if (loading.parentNode) {
+                    loading.remove();
+                }
+            }, 300);
         }
     }
 

@@ -1,7 +1,6 @@
-// PWA functionality and file handling - Updated to use unified file handler
+// PWA functionality and file handling - Simplified without installation banner
 class PWAManager {
     constructor() {
-        this.deferredPrompt = null;
         this.pendingFileHandle = null;
         this.init();
     }
@@ -9,9 +8,6 @@ class PWAManager {
     init() {
         // Register service worker
         this.registerServiceWorker();
-        
-        // Setup install prompt
-        this.setupInstallPrompt();
         
         // Handle file associations
         this.handleFileAssociations();
@@ -48,85 +44,6 @@ class PWAManager {
             }
         } else {
             console.warn('Service Workers not supported - PWA features will be limited');
-        }
-    }
-
-    setupInstallPrompt() {
-        // Listen for beforeinstallprompt event
-        window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('Install prompt available');
-            e.preventDefault(); // Prevent automatic prompt
-            this.deferredPrompt = e;
-            
-            // Show custom install prompt if not already installed
-            if (!window.matchMedia('(display-mode: standalone)').matches) {
-                this.showCustomInstallPrompt();
-            }
-        });
-
-        // Handle app installed event
-        window.addEventListener('appinstalled', () => {
-            console.log('ChroMesh was installed successfully');
-            this.deferredPrompt = null;
-            this.hideCustomInstallPrompt();
-        });
-
-        // Hide install prompt if already in standalone mode
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            console.log('App is running in standalone mode');
-        }
-    }
-
-    showCustomInstallPrompt() {
-        // Create a subtle install prompt
-        const installBanner = document.createElement('div');
-        installBanner.id = 'install-banner';
-        installBanner.className = 'install-banner';
-        installBanner.innerHTML = `
-            <div class="install-banner-content">
-                <span class="install-icon">📱</span>
-                <span class="install-text">Install ChroMesh for a better experience</span>
-                <button id="install-app-btn" class="install-btn">Install</button>
-                <button id="dismiss-install-btn" class="dismiss-btn">×</button>
-            </div>
-        `;
-        
-        document.body.appendChild(installBanner);
-
-        // Handle install button click
-        document.getElementById('install-app-btn').addEventListener('click', async () => {
-            if (this.deferredPrompt) {
-                this.deferredPrompt.prompt();
-                const { outcome } = await this.deferredPrompt.userChoice;
-                console.log(`Install prompt outcome: ${outcome}`);
-                
-                if (outcome === 'accepted') {
-                    console.log('User accepted the install prompt');
-                } else {
-                    console.log('User dismissed the install prompt');
-                }
-                
-                this.deferredPrompt = null;
-            }
-            this.hideCustomInstallPrompt();
-        });
-
-        // Handle dismiss button
-        document.getElementById('dismiss-install-btn').addEventListener('click', () => {
-            this.hideCustomInstallPrompt();
-            this.deferredPrompt = null;
-        });
-
-        // Auto-hide after 10 seconds
-        setTimeout(() => {
-            this.hideCustomInstallPrompt();
-        }, 10000);
-    }
-
-    hideCustomInstallPrompt() {
-        const banner = document.getElementById('install-banner');
-        if (banner) {
-            banner.remove();
         }
     }
 
