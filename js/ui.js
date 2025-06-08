@@ -1,4 +1,4 @@
-// UI management and mesh manipulation - Updated to use unified file handler
+// UI management and mesh manipulation - Updated to use unified file handler and OrbitControls
 class MeshManager {
     constructor() {
         this.currentMesh = null;
@@ -38,6 +38,11 @@ class MeshManager {
         
         // Apply saved settings to the new mesh
         window.settings.applyToMesh(this.currentMesh);
+        
+        // Focus camera on the new mesh if using OrbitControls
+        if (window.cameraControls && window.cameraControls.focusOnMesh) {
+            window.cameraControls.focusOnMesh(this.currentMesh);
+        }
     }
 
     centerAndScaleMesh(geometry) {
@@ -135,7 +140,7 @@ class MeshManager {
     }
 }
 
-// UI Controls class for handling all UI interactions - Updated for unified file handling
+// UI Controls class for handling all UI interactions - Updated for unified file handling and OrbitControls
 class UIControls {
     constructor() {
         this.setupDragAndDrop();
@@ -404,10 +409,18 @@ class UIControls {
     setupRotationToggle(autoRotateToggle, rotationIcon) {
         autoRotateToggle.addEventListener('click', () => {
             autoRotateToggle.classList.toggle('active');
-            window.settings.autoRotate = autoRotateToggle.classList.contains('active');
+            const isActive = autoRotateToggle.classList.contains('active');
+            
+            // Update settings
+            window.settings.autoRotate = isActive;
+            
+            // Update camera controls auto-rotation
+            if (window.cameraControls) {
+                window.cameraControls.setAutoRotate(isActive);
+            }
             
             // Update icon state
-            if (window.settings.autoRotate) {
+            if (isActive) {
                 rotationIcon.classList.add('active');
             } else {
                 rotationIcon.classList.remove('active');

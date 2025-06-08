@@ -1,4 +1,4 @@
-// Three.js scene management
+// Three.js scene management - Updated for OrbitControls compatibility
 class SceneManager {
     constructor() {
         this.scene = null;
@@ -47,7 +47,7 @@ class SceneManager {
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize());
         
-        // Start render loop
+        // Start render loop (OrbitControls handles its own updates)
         this.animate();
     }
 
@@ -66,14 +66,12 @@ class SceneManager {
         this.scene.add(pointLight);
     }
 
-    // Animation loop
+    // Animation loop - simplified since OrbitControls handles camera updates
     animate() {
         requestAnimationFrame(() => this.animate());
         
-        // Auto-rotate mesh around Y axis if enabled
-        if (window.settings && window.settings.autoRotate && window.meshManager && window.meshManager.currentMesh) {
-            window.meshManager.currentMesh.rotation.y += 0.01;
-        }
+        // Note: Auto-rotation is now handled by OrbitControls in the CameraControls class
+        // We removed the manual mesh rotation from here to avoid conflicts
         
         this.renderer.render(this.scene, this.camera);
     }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chromesh-v1.0.0';
+const CACHE_NAME = 'chromesh-v1.0.1';
 
 const urlsToCache = [
   './',
@@ -13,7 +13,8 @@ const urlsToCache = [
   './js/parsers.js',
   './js/fileHandler.js',
   './js/pwa.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'
+  'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
+  'https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js'
 ];
 
 console.log('URLs to cache:', urlsToCache);
