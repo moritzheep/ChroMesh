@@ -2,12 +2,12 @@
     "name": "ChroMesh",
     "short_name": "ChroMesh",
     "description": "A 3D mesh viewer for OBJ, STL, and PLY files",
-    "start_url": "/",
+    "start_url": "/ChroMesh/",
     "display": "standalone",
     "background_color": "#1e3c72",
     "theme_color": "#2a5298",
     "orientation": "any",
-    "scope": "/",
+    "scope": "/ChroMesh/",
     "icons": [
       {
         "src": "icons/icon-72x72.png",
