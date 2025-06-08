@@ -1,18 +1,18 @@
 const CACHE_NAME = 'chromesh-v1.0.0';
 
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/manifest.json',
-  '/js/app.js',
-  '/js/scene.js',
-  '/js/controls.js',
-  '/js/ui.js',
-  '/js/settings.js',
-  '/js/parsers.js',
-  '/js/fileHandler.js',
-  '/js/pwa.js',
+  './',
+  './index.html',
+  './styles.css',
+  './manifest.json',
+  './js/app.js',
+  './js/scene.js',
+  './js/controls.js',
+  './js/ui.js',
+  './js/settings.js',
+  './js/parsers.js',
+  './js/fileHandler.js',
+  './js/pwa.js',
   'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'
 ];
 
@@ -117,7 +117,7 @@ self.addEventListener('fetch', event => {
         
         // For navigation requests, return the cached index.html
         if (event.request.destination === 'document') {
-          return caches.match(`${BASE_PATH}index.html`);
+          return caches.match('./index.html');
         }
         
         // For other requests, just fail
