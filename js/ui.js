@@ -1,4 +1,4 @@
-// UI management and mesh manipulation
+// UI management and mesh manipulation - Updated to use unified file handler
 class MeshManager {
     constructor() {
         this.currentMesh = null;
@@ -135,12 +135,13 @@ class MeshManager {
     }
 }
 
-// UI Controls class for handling all UI interactions
+// UI Controls class for handling all UI interactions - Updated for unified file handling
 class UIControls {
     constructor() {
         this.setupDragAndDrop();
         this.setupFileInput();
         this.setupToggleControls();
+        this.setupFileHandlerIntegration();
     }
 
     setupDragAndDrop() {
@@ -161,20 +162,69 @@ class UIControls {
             dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
         });
         
-        // Handle dropped files
-        dropZone.addEventListener('drop', (e) => {
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                this.handleFile(files[0]);
-            }
+        // Handle dropped files using unified file handler
+        dropZone.addEventListener('drop', async (e) => {
+            await window.fileHandler.loadFromDragDrop(e);
         });
     }
 
     setupFileInput() {
         const fileInput = document.getElementById('file-input');
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                this.handleFile(e.target.files[0]);
+        fileInput.addEventListener('change', async (e) => {
+            console.log('📁 File input change event triggered');
+            console.log('Event:', e);
+            console.log('Target:', e.target);
+            console.log('Files:', e.target.files);
+            console.log('File count:', e.target.files?.length);
+            
+            // Check if we have files
+            if (!e.target.files || e.target.files.length === 0) {
+                console.warn('❌ No files selected in file input');
+                return;
+            }
+            
+            const file = e.target.files[0];
+            console.log('📄 Selected file:', {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                lastModified: file.lastModified
+            });
+            
+            // Use the unified file handler
+            try {
+                console.log('🔄 Calling fileHandler.loadFromFileInput...');
+                const success = await window.fileHandler.loadFromFileInput(e);
+                console.log('📁 File input result:', success);
+            } catch (error) {
+                console.error('❌ FileHandler.loadFromFileInput failed:', error);
+                // Fallback: load file directly
+                console.log('🔄 Trying direct file load as fallback...');
+                try {
+                    const success = await window.fileHandler.loadFile(file, 'file-dialog-fallback');
+                    console.log('📁 Direct file load result:', success);
+                } catch (fallbackError) {
+                    console.error('❌ Direct file load also failed:', fallbackError);
+                }
+            }
+            
+            // Clear the input so the same file can be selected again
+            e.target.value = '';
+            console.log('🧹 File input cleared');
+        });
+    }
+
+    setupFileHandlerIntegration() {
+        // Listen for loading state changes to update UI accordingly
+        window.fileHandler.onLoadingStateChange((isLoading) => {
+            // Update UI based on loading state
+            const dropZone = document.getElementById('drop-zone');
+            if (isLoading) {
+                dropZone.style.pointerEvents = 'none';
+                dropZone.style.opacity = '0.5';
+            } else {
+                dropZone.style.pointerEvents = '';
+                dropZone.style.opacity = '';
             }
         });
     }
@@ -184,45 +234,10 @@ class UIControls {
         e.stopPropagation();
     }
 
-    // File handling
-    handleFile(file) {
-        if (!file) return;
-        
-        this.showLoading(true);
-        const reader = new FileReader();
-        
-        reader.onload = (e) => {
-            const content = e.target.result;
-            
-            try {
-                const geometry = MeshParsers.parse(content, file.name);
-                window.meshManager.displayMesh(geometry, file.name);
-            } catch (error) {
-                alert('Error loading file: ' + error.message);
-                console.error(error);
-            }
-            
-            this.showLoading(false);
-        };
-        
-        if (file.name.toLowerCase().endsWith('.stl')) {
-            reader.readAsArrayBuffer(file);
-        } else {
-            reader.readAsText(file);
-        }
-    }
-
-    // Show/hide loading indicator
-    showLoading(show) {
-        let loading = document.querySelector('.loading');
-        if (show && !loading) {
-            loading = document.createElement('div');
-            loading.className = 'loading';
-            loading.innerHTML = '<div class="spinner"></div>Loading mesh...';
-            document.getElementById('container').appendChild(loading);
-        } else if (!show && loading) {
-            loading.remove();
-        }
+    // Legacy method for backwards compatibility - now delegates to unified handler
+    async handleFile(file) {
+        console.warn('UIControls.handleFile() is deprecated, use window.fileHandler.loadFile() instead');
+        return await window.fileHandler.loadFile(file, 'legacy');
     }
 
     // Setup toggle functionality

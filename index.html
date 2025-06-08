@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three.js Triangle Mesh Viewer</title>
+    <title>ChroMesh - 3D Mesh Viewer</title>
 
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#2a5298">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="MeshViewer">
-    <meta name="description" content="A 3D mesh viewer for OBJ, STL, and PLY files">
+    <meta name="apple-mobile-web-app-title" content="ChroMesh">
+    <meta name="description" content="A unified 3D mesh viewer for OBJ, STL, and PLY files">
     
     <!-- Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -117,12 +118,23 @@
         </div>
     </div>
 
+    <!-- Three.js and ChroMesh Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Core system scripts (order matters) -->
     <script src="js/settings.js"></script>
     <script src="js/parsers.js"></script>
     <script src="js/scene.js"></script>
     <script src="js/controls.js"></script>
+    
+    <!-- New unified file handler (must load before UI and PWA) -->
+    <script src="js/fileHandler.js"></script>
+    
+    <!-- UI and PWA scripts -->
     <script src="js/ui.js"></script>
+    <script src="js/pwa.js"></script>
+    
+    <!-- Main app initialization (must be last) -->
     <script src="js/app.js"></script>
 </body>
 </html>

@@ -2,12 +2,12 @@
     "name": "ChroMesh",
     "short_name": "ChroMesh",
     "description": "A 3D mesh viewer for OBJ, STL, and PLY files",
-    "start_url": "/ChroMesh/",
+    "start_url": "/",
     "display": "standalone",
     "background_color": "#1e3c72",
     "theme_color": "#2a5298",
     "orientation": "any",
-    "scope": "/ChroMesh/",
+    "scope": "/",
     "icons": [
       {
         "src": "icons/icon-72x72.png",
@@ -52,7 +52,7 @@
     ],
     "file_handlers": [
       {
-        "action": "/ChroMesh/",
+        "action": "/",
         "accept": {
           "model/obj": [".obj"],
           "model/stl": [".stl"],
@@ -67,7 +67,7 @@
         "name": "Open OBJ File",
         "short_name": "Open OBJ",
         "description": "Open an OBJ mesh file",
-        "url": "/?type=obj",
+        "url": "./?type=obj",
         "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
       }
     ]

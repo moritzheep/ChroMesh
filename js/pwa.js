@@ -1,7 +1,8 @@
-// PWA functionality and file handling
+// PWA functionality and file handling - Updated to use unified file handler
 class PWAManager {
     constructor() {
         this.deferredPrompt = null;
+        this.pendingFileHandle = null;
         this.init();
     }
 
@@ -22,8 +23,14 @@ class PWAManager {
     async registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             try {
-                const registration = await navigator.serviceWorker.register('/ChroMesh/sw.js');
+                console.log('Attempting to register service worker at: ./sw.js');
+                
+                const registration = await navigator.serviceWorker.register('./sw.js', {
+                    scope: './'
+                });
+                
                 console.log('Service Worker registered successfully:', registration);
+                console.log('Service Worker scope:', registration.scope);
                 
                 // Handle updates
                 registration.addEventListener('updatefound', () => {
@@ -36,120 +43,156 @@ class PWAManager {
                     });
                 });
             } catch (error) {
-                console.log('Service Worker registration failed:', error);
+                console.error('Service Worker registration failed:', error);
+                console.warn('PWA features will be limited');
             }
+        } else {
+            console.warn('Service Workers not supported - PWA features will be limited');
         }
     }
 
     setupInstallPrompt() {
-        const installPrompt = document.getElementById('install-prompt');
-        const installButton = document.getElementById('install-button');
-        const dismissButton = document.getElementById('dismiss-install');
-
         // Listen for beforeinstallprompt event
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
+            console.log('Install prompt available');
+            e.preventDefault(); // Prevent automatic prompt
             this.deferredPrompt = e;
             
-            // Show install prompt if not already installed
+            // Show custom install prompt if not already installed
             if (!window.matchMedia('(display-mode: standalone)').matches) {
-                installPrompt.classList.remove('hidden');
+                this.showCustomInstallPrompt();
             }
         });
 
-        // Handle install button click
-        installButton.addEventListener('click', async () => {
-            if (this.deferredPrompt) {
-                this.deferredPrompt.prompt();
-                const { outcome } = await this.deferredPrompt.userChoice;
-                console.log(`Install prompt outcome: ${outcome}`);
-                this.deferredPrompt = null;
-            }
-            installPrompt.classList.add('hidden');
-        });
-
-        // Handle dismiss button
-        dismissButton.addEventListener('click', () => {
-            installPrompt.classList.add('hidden');
+        // Handle app installed event
+        window.addEventListener('appinstalled', () => {
+            console.log('ChroMesh was installed successfully');
             this.deferredPrompt = null;
+            this.hideCustomInstallPrompt();
         });
 
         // Hide install prompt if already in standalone mode
         if (window.matchMedia('(display-mode: standalone)').matches) {
-            installPrompt.classList.add('hidden');
+            console.log('App is running in standalone mode');
+        }
+    }
+
+    showCustomInstallPrompt() {
+        // Create a subtle install prompt
+        const installBanner = document.createElement('div');
+        installBanner.id = 'install-banner';
+        installBanner.className = 'install-banner';
+        installBanner.innerHTML = `
+            <div class="install-banner-content">
+                <span class="install-icon">📱</span>
+                <span class="install-text">Install ChroMesh for a better experience</span>
+                <button id="install-app-btn" class="install-btn">Install</button>
+                <button id="dismiss-install-btn" class="dismiss-btn">×</button>
+            </div>
+        `;
+        
+        document.body.appendChild(installBanner);
+
+        // Handle install button click
+        document.getElementById('install-app-btn').addEventListener('click', async () => {
+            if (this.deferredPrompt) {
+                this.deferredPrompt.prompt();
+                const { outcome } = await this.deferredPrompt.userChoice;
+                console.log(`Install prompt outcome: ${outcome}`);
+                
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                } else {
+                    console.log('User dismissed the install prompt');
+                }
+                
+                this.deferredPrompt = null;
+            }
+            this.hideCustomInstallPrompt();
+        });
+
+        // Handle dismiss button
+        document.getElementById('dismiss-install-btn').addEventListener('click', () => {
+            this.hideCustomInstallPrompt();
+            this.deferredPrompt = null;
+        });
+
+        // Auto-hide after 10 seconds
+        setTimeout(() => {
+            this.hideCustomInstallPrompt();
+        }, 10000);
+    }
+
+    hideCustomInstallPrompt() {
+        const banner = document.getElementById('install-banner');
+        if (banner) {
+            banner.remove();
         }
     }
 
     handleFileAssociations() {
-        // Handle files opened from ChromeOS file manager
+        // Handle files opened from ChromeOS file manager using Launch Queue API
         if ('launchQueue' in window) {
+            console.log('Launch Queue API available - setting up file association handler');
+            
             window.launchQueue.setConsumer(async (launchParams) => {
                 console.log('Launch queue triggered with params:', launchParams);
                 
                 if (launchParams.files && launchParams.files.length > 0) {
                     const fileHandle = launchParams.files[0];
+                    console.log('File handle received from launch queue:', fileHandle);
+                    
+                    // Store the file handle if file handler isn't ready yet
+                    if (!window.fileHandler) {
+                        console.log('File handler not ready, storing file handle as pending');
+                        this.pendingFileHandle = fileHandle;
+                        return;
+                    }
+                    
+                    // Load the file using unified file handler
                     try {
-                        const file = await fileHandle.getFile();
-                        console.log('Opening file from ChromeOS:', file.name, file.type, file.size);
-                        
-                        // Wait for UI to be ready, then handle the file
-                        this.handleLaunchedFile(file);
-                        
+                        const success = await window.fileHandler.loadFromFileHandle(fileHandle);
+                        if (success) {
+                            console.log('Successfully loaded file from launch queue');
+                        } else {
+                            console.error('Failed to load file from launch queue');
+                        }
                     } catch (error) {
-                        console.error('Error handling file from launch queue:', error);
+                        console.error('Error loading file from launch queue:', error);
                     }
                 } else {
                     console.log('No files in launch params');
                 }
             });
+        } else {
+            console.log('Launch Queue API not available');
         }
 
         // Also handle URL parameters (fallback method)
         this.handleURLParams();
 
-        // Handle drag and drop from file system
-        document.addEventListener('dragover', (e) => {
-            e.preventDefault();
-        });
-
-        document.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const files = e.dataTransfer.files;
-            if (files.length > 0 && window.uiControls) {
-                window.uiControls.handleFile(files[0]);
-            }
-        });
+        // Enhanced drag and drop from file system
+        this.setupGlobalDragAndDrop();
     }
 
-    async handleLaunchedFile(file) {
-        // Wait for UI to be ready
-        const maxWait = 5000; // 5 seconds
-        const checkInterval = 100; // 100ms
-        let waited = 0;
+    setupGlobalDragAndDrop() {
+        // Global drag and drop handler (catches drops anywhere on the page)
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
 
-        const waitForUI = () => {
-            return new Promise((resolve) => {
-                const check = () => {
-                    if (window.uiControls && window.meshManager) {
-                        console.log('UI ready, loading file:', file.name);
-                        resolve(true);
-                    } else if (waited < maxWait) {
-                        waited += checkInterval;
-                        setTimeout(check, checkInterval);
-                    } else {
-                        console.warn('UI not ready after timeout, storing file as pending');
-                        window.pendingFile = file;
-                        resolve(false);
-                    }
-                };
-                check();
-            });
-        };
-
-        const uiReady = await waitForUI();
-        if (uiReady) {
-            window.uiControls.handleFile(file);
-        }
+        document.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            
+            // Only handle if the drop didn't occur on the drop zone
+            // (drop zone has its own handler)
+            if (!e.target.closest('#drop-zone')) {
+                if (window.fileHandler) {
+                    await window.fileHandler.loadFromDragDrop(e);
+                }
+            }
+        });
     }
 
     handleURLParams() {
@@ -166,13 +209,36 @@ class PWAManager {
 
     setupMessageListener() {
         // Listen for messages from service worker
-        navigator.serviceWorker.addEventListener('message', (event) => {
-            if (event.data.type === 'FILE_HANDLER') {
-                if (window.uiControls) {
-                    window.uiControls.handleFile(event.data.file);
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', async (event) => {
+                console.log('Message from service worker:', event.data);
+                
+                if (event.data.type === 'FILE_HANDLER') {
+                    if (window.fileHandler && event.data.file) {
+                        await window.fileHandler.loadFromPWALaunch(event.data.file);
+                    }
                 }
+            });
+        }
+    }
+
+    // Handle any pending file handle when file handler becomes available
+    async processPendingFileHandle() {
+        if (this.pendingFileHandle && window.fileHandler) {
+            console.log('Processing pending file handle');
+            try {
+                const success = await window.fileHandler.loadFromFileHandle(this.pendingFileHandle);
+                if (success) {
+                    console.log('Successfully processed pending file handle');
+                } else {
+                    console.error('Failed to process pending file handle');
+                }
+            } catch (error) {
+                console.error('Error processing pending file handle:', error);
+            } finally {
+                this.pendingFileHandle = null;
             }
-        });
+        }
     }
 
     showUpdatePrompt() {
@@ -218,6 +284,20 @@ class PWAManager {
                 console.log('Error sharing:', error);
             }
         }
+    }
+
+    // Debug method to check file handling capabilities
+    checkFileHandlingSupport() {
+        const support = {
+            launchQueue: 'launchQueue' in window,
+            fileSystemAccess: 'showOpenFilePicker' in window,
+            dragAndDrop: true, // Always supported
+            webShare: 'share' in navigator,
+            serviceWorker: 'serviceWorker' in navigator
+        };
+        
+        console.log('File handling support:', support);
+        return support;
     }
 }
 
